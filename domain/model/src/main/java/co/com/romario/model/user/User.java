@@ -31,6 +31,8 @@ public class User {
     private LocalDateTime creationDate;
     private LocalDateTime updateDate;
 
+    public User() {}
+
     public boolean isValidAge() {
         return birthDate.isBefore((LocalDate.now().minusYears(18)));
     }
