@@ -6,8 +6,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import co.com.romario.model.user.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
@@ -22,36 +27,26 @@ public class RouterRest {
     @Bean
     @RouterOperations({
         @RouterOperation(
-            path = "/api/usecase/path",
-            produces = { "application/json" },
-            method = { RequestMethod.GET },
-            beanClass = Handler.class,
-            beanMethod = "listenGETUseCase",
-            operation = @Operation(summary = "Obtener información de usecase", description = "Devuelve datos de prueba")
-        ),
-        @RouterOperation(
-            path = "/api/usecase/otherpath",
-            produces = { "application/json" },
-            method = { RequestMethod.POST },
-            beanClass = Handler.class,
-            beanMethod = "listenPOSTUseCase",
-            operation = @Operation(summary = "Crear información en otherpath")
-        ),
-        @RouterOperation(
-            path = "/api/otherusercase/path",
-            produces = { "application/json" },
-            method = { RequestMethod.GET },
-            beanClass = Handler.class,
-            beanMethod = "listenGETOtherUseCase",
-            operation = @Operation(summary = "Obtener datos de otro caso de uso")
-        ),
-        @RouterOperation(
             path = "/api/v1/usuarios",
             produces = { "application/json" },
-            method = { RequestMethod.POST },
+            method = RequestMethod.POST,
             beanClass = Handler.class,
             beanMethod = "createUser",
-            operation = @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario en el sistema")
+            operation = @Operation(
+                operationId = "createUser",
+                summary = "Crear usuario",
+                tags = { "User API" },
+                requestBody = @RequestBody(
+                    required = true,
+                    description = "Datos del nuevo usuario",
+                    content = @Content(schema = @Schema(implementation = User.class))
+                ),
+                responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuario creado", content = @Content(schema = @Schema(implementation = User.class))),
+                    @ApiResponse(responseCode = "400", description = "Error en la petición"),
+                    @ApiResponse(responseCode = "500", description = "Error interno")
+                }
+            )
         )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
