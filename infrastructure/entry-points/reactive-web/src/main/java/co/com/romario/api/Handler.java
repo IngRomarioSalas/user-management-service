@@ -24,7 +24,7 @@ public class Handler {
         return request.bodyToMono(User.class)
                 .flatMap(user -> {
                     log.info("Iniciando creación de usuario: {}", user.getEmail());
-                    return createUserUseCase.execute(user)
+                    return createUserUseCase.registerUser(user)
                             .doOnSuccess(u -> log.info("Usuario creado exitosamente: {}", u.getUserId()))
                             .doOnError(e -> log.error("Error al crear usuario: {}", e.getMessage()));
                 })

@@ -12,7 +12,7 @@ public class CreateUserUseCase {
 
     private final UserRepository userRepository;
     
-    public Mono<User> execute(User user) {
+    public Mono<User> registerUser(User user) {
         return validateUserData(user)
                 .then(checkUserDoesNotExist(user))
                 .then(createUser(user));
@@ -29,6 +29,10 @@ public class CreateUserUseCase {
         
         if (user.getBaseSalary() > 15000000) {
             return Mono.error(new RuntimeException("El salario base no puede exceder 15,000,000"));
+        }
+
+        if( user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            return Mono.error(new RuntimeException("El correo electrónico no es válido"));
         }
         
         return Mono.empty();
