@@ -4,9 +4,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import co.com.romario.usecase.createuser.CreateUserUseCase;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -14,6 +17,10 @@ class RouterRestTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    // Mockea el caso de uso para que Spring pueda inyectarlo en Handler
+    @MockBean
+    private CreateUserUseCase createUserUseCase;
 
     @Test
     void testListenGETUseCase() {
@@ -23,10 +30,7 @@ class RouterRestTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+                .value(userResponse -> Assertions.assertThat(userResponse).isEmpty());
     }
 
     @Test
@@ -37,10 +41,7 @@ class RouterRestTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+                .value(userResponse -> Assertions.assertThat(userResponse).isEmpty());
     }
 
     @Test
@@ -52,9 +53,6 @@ class RouterRestTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+                .value(userResponse -> Assertions.assertThat(userResponse).isEmpty());
     }
 }

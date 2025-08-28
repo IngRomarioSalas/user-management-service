@@ -2,9 +2,12 @@ package co.com.romario.api.config;
 
 import co.com.romario.api.Handler;
 import co.com.romario.api.RouterRest;
+import co.com.romario.usecase.createuser.CreateUserUseCase;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -16,6 +19,9 @@ class ConfigTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    private CreateUserUseCase createUserUseCase;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {
