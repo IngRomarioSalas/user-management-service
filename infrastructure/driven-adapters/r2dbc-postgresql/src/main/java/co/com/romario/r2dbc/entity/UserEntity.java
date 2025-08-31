@@ -10,22 +10,17 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-
+import java.util.UUID;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("users")
+@Table("usuarios")
 public class UserEntity {
 
     @Id
-    private Long id;
-    
-    @Column("user_id")
-    private String userId;
+    private UUID id;
     
     @Column("nombres")
     private String names;
@@ -54,16 +49,4 @@ public class UserEntity {
     @Column("salario_base")
     private Double baseSalary;
     
-    @Column("ocupacion")
-    private String occupation;
-    
-    @Column("empresa")
-    private String company;
-    
-    @Column("fecha_creacion")
-    private LocalDateTime creationDate;
-    
-    @Column("fecha_actualizacion")
-    private LocalDateTime updateDate;
-
 }

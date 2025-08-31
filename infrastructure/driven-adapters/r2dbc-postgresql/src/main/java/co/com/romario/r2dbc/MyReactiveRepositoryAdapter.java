@@ -6,6 +6,8 @@ import co.com.romario.r2dbc.entity.UserEntity;
 import co.com.romario.r2dbc.helper.ReactiveAdapterOperations;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     User/* change for domain model */,
     UserEntity/* change for adapter model */,
-    Long,
+    UUID,
     MyReactiveRepository
 > implements UserRepository {
     public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
@@ -27,36 +29,12 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         this.mapper = mapper;
     }
 
-    @Override
-    public Mono<User> findByUserId(String userId) {
-        return repository.findByUserId(userId)
-                .map(entity -> mapper.map(entity, User.class));
-    }
-
-    @Override
-    public Mono<User> findByEmail(String email) {
-        return repository.findByEmail(email)
-                .map(entity -> mapper.map(entity, User.class));
-    }
-
-    @Override
-    public Mono<User> findByDocumentNumber(String documentNumber) {
-         return repository.findByDocumentNumber(documentNumber)
-                .map(entity -> mapper.map(entity, User.class));
-    }
 
     @Override
     public Mono<Boolean> existsByEmail(String email) {
-         return repository.findByEmail(email)
-                     .hasElement();
+        return repository.existsByEmail(email);
     }
 
-    @Override
-    public Mono<Boolean> existsByDocumentNumber(String documentNumber) {
-        return repository.findByDocumentNumber(documentNumber)
-                     .hasElement();
-    }
-
-
+    
 
 }

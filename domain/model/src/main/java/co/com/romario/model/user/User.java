@@ -2,21 +2,20 @@ package co.com.romario.model.user;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-//import lombok.NoArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-//@NoArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class User {
-    private Long id;
-    private String userId;
+    private UUID id;
     private String names;
     private String lastName;
     private LocalDate birthDate;
@@ -26,18 +25,4 @@ public class User {
     private String phoneNumber;
     private String email;
     private Double baseSalary;
-    private String occupation;
-    private String company;
-    private LocalDateTime creationDate;
-    private LocalDateTime updateDate;
-
-    public User() {}
-
-    public boolean isValidAge() {
-        return birthDate.isBefore((LocalDate.now().minusYears(18)));
-    }
-
-    public String getFullName() {
-        return names + " " + lastName;
-    }
 }
