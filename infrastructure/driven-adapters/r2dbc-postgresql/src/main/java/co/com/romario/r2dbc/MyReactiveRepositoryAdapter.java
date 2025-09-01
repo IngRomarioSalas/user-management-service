@@ -7,6 +7,7 @@ import co.com.romario.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.romario.r2dbc.mapper.UserMapper;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import org.reactivecommons.utils.ObjectMapper;
@@ -36,10 +37,26 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.existsByEmail(email);
     }
 
-     @Override
+    /* @Override
     public Mono<User> save(User user) {
         UserEntity entity = mapper.toEntity(user);
         return repository.save(entity)
-                         .map(mapper::toModel);
+                .flatMap(e -> {
+                    User model = mapper.toModel(e);
+                    return model != null ? Mono.just(model) : Mono.empty();
+                });
+    } */
+
+    @Override
+    public Mono<User> save(User user) {
+        UserEntity entity = mapper.toEntity(user);
+        return repository.save(entity)
+                .map(e -> {
+                    User model = mapper.toModel(e);
+                    if (model == null)
+                        throw new IllegalStateException("Mapper returned null");
+                    return model;
+                });
     }
+
 }

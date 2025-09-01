@@ -8,7 +8,7 @@ import co.com.romario.r2dbc.entity.UserEntity;
 public class UserMapper {
 
     public UserEntity toEntity(User model) {
-        if (model == null) return null;
+        if (model == null) return new UserEntity();
         return UserEntity.builder()
                 .id(model.getId())
                 .names(model.getNames())
@@ -24,7 +24,7 @@ public class UserMapper {
     }
 
     public User toModel(UserEntity entity) {
-        if (entity == null) return null;
+        if (entity == null) return User.builder().build();
         return User.builder()
                 .id(entity.getId())
                 .names(entity.getNames())

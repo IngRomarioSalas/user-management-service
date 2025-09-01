@@ -6,9 +6,13 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import co.com.romario.model.user.gateways.UserRepository;
+import co.com.romario.usecase.createuser.CreateUserUseCase;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UseCasesConfigTest {
@@ -17,16 +21,19 @@ public class UseCasesConfigTest {
     void testUseCaseBeansExist() {
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfig.class)) {
 
-            String[] beanNames = context.getBeanDefinitionNames();
-            boolean useCaseBeanFound = false;
-            for (String beanName : beanNames) {
-                if (beanName.endsWith("UseCase")) {
-                    useCaseBeanFound = true;
-                    break;
-                }
-            }
-            assertTrue(useCaseBeanFound, "No beans ending with 'UseCase' were found");
+            // Aseguramos que efectivamente existe el bean
+            CreateUserUseCase useCase = context.getBean(CreateUserUseCase.class);
+            assertNotNull(useCase, "CreateUserUseCase bean should not be null");
+
+            // Verificamos que tiene la dependencia inyectada correctamente
+            UserRepository repo = context.getBean(UserRepository.class);
+            assertSame(repo, extractUserRepository(useCase),
+                    "The UserRepository injected into CreateUserUseCase is not the expected mock");
         }
+    }
+
+    private UserRepository extractUserRepository(CreateUserUseCase useCase) {
+        return (UserRepository) ReflectionTestUtils.getField(useCase, "userRepository");
     }
 
     @Configuration

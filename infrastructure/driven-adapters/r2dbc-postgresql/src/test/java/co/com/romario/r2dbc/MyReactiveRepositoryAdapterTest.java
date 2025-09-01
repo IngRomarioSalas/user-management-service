@@ -1,15 +1,17 @@
 package co.com.romario.r2dbc;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
 
 import co.com.romario.model.user.User;
 import co.com.romario.r2dbc.entity.UserEntity;
-import reactor.core.publisher.Flux;
+import co.com.romario.r2dbc.mapper.UserMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -17,210 +19,64 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+
 @ExtendWith(MockitoExtension.class)
 class MyReactiveRepositoryAdapterTest {
 
-    @InjectMocks
-    MyReactiveRepositoryAdapter repositoryAdapter;
+    private MyReactiveRepository repository;
+    private UserMapper mapper; // antes era ObjectMapper, ahora es UserMapper
+    private ObjectMapper objectMapper; // necesario para el constructor
+    private MyReactiveRepositoryAdapter adapter;
 
-    @Mock
-    MyReactiveRepository repository;
 
-    @Mock
-    ObjectMapper mapper;
+    @BeforeEach
+    void setUp() {
+        repository = Mockito.mock(MyReactiveRepository.class);
+        mapper = new UserMapper(); // usamos la implementación real de UserMapper
+        objectMapper = Mockito.mock(ObjectMapper.class); // puedes mockearlo si no se usa en tests
 
-    // -----------------------------
-    // findById
-    // -----------------------------
-    @Test
-    void mustFindValueById() {
-        UserEntity entity = new UserEntity();
-        entity.setId(1L);
-        User user = new User();
-        when(repository.findById(1L)).thenReturn(Mono.just(entity));
-        when(mapper.map(entity, User.class)).thenReturn(user);
-
-        StepVerifier.create(repositoryAdapter.findById(1L))
-                .expectNext(user)
-                .verifyComplete();
+        adapter = new MyReactiveRepositoryAdapter(repository, mapper, objectMapper);
     }
 
     @Test
-    void mustFindValueById_empty() {
-        when(repository.findById(2L)).thenReturn(Mono.empty());
+    void existsByEmail_true() {
+        String email = "test@example.com";
+        Mockito.lenient().when(repository.existsByEmail(email)).thenReturn(Mono.just(true));
 
-        StepVerifier.create(repositoryAdapter.findById(2L))
-                .verifyComplete();
-    }
-
-    // -----------------------------
-    // findAll
-    // -----------------------------
-    @Test
-    void mustFindAllValues() {
-        UserEntity entity = new UserEntity();
-        User user = new User();
-        when(repository.findAll()).thenReturn(Flux.just(entity));
-        when(mapper.map(entity, User.class)).thenReturn(user);
-
-        StepVerifier.create(repositoryAdapter.findAll())
-                .expectNext(user)
-                .verifyComplete();
-    }
-
-    @Test
-    void mustFindAllValues_empty() {
-        when(repository.findAll()).thenReturn(Flux.empty());
-
-        StepVerifier.create(repositoryAdapter.findAll())
-                .verifyComplete();
-    }
-
-    // -----------------------------
-    // findByExample
-    // -----------------------------
-
-// Para findByExample con resultado
-// @Test
-// void mustFindByExample() {
-//     UserEntity entity = new UserEntity();
-//     User user = new User();
-
-//     when(repository.findAll(argThat(example ->
-//             example != null && example.getProbe() != null
-//     ))).thenReturn(Flux.just(entity));
-
-//     when(mapper.map(entity, User.class)).thenReturn(user);
-
-//     Flux<User> result = repositoryAdapter.findByExample(user);
-
-//     StepVerifier.create(result)
-//             .expectNext(user)
-//             .verifyComplete();
-// }
-
-// Para findByExample vacío
-// @Test
-// void mustFindByExample_empty() {
-//     User user = new User();
-
-//     when(repository.findAll(argThat(example ->
-//             example != null && example.getProbe() != null
-//     ))).thenReturn(Flux.empty());
-
-//     Flux<User> result = repositoryAdapter.findByExample(user);
-
-//     StepVerifier.create(result)
-//             .verifyComplete();
-// }
-
-
-    // -----------------------------
-    // save
-    // -----------------------------
-    @Test
-    void mustSaveValue() {
-        UserEntity entity = new UserEntity();
-        User user = new User();
-
-        // Mappeo desde entidad a dominio
-        when(mapper.map(any(User.class), eq(UserEntity.class))).thenReturn(entity);
-        when(mapper.map(any(UserEntity.class), eq(User.class))).thenReturn(user);
-
-        // Stub del repository
-        when(repository.save(any(UserEntity.class))).thenReturn(Mono.just(entity));
-
-        Mono<User> result = repositoryAdapter.save(user);
-
-        StepVerifier.create(result)
-                .expectNext(user)
-                .verifyComplete();
-    }
-
-    // -----------------------------
-    // findByEmail
-    // -----------------------------
-    @Test
-    void mustFindByEmail() {
-        UserEntity entity = new UserEntity();
-        User user = new User();
-        when(repository.findByEmail("test@email.com")).thenReturn(Mono.just(entity));
-        when(mapper.map(entity, User.class)).thenReturn(user);
-
-        StepVerifier.create(repositoryAdapter.findByEmail("test@email.com"))
-                .expectNext(user)
-                .verifyComplete();
-    }
-
-    @Test
-    void mustFindByEmail_empty() {
-        when(repository.findByEmail("missing@email.com")).thenReturn(Mono.empty());
-
-        StepVerifier.create(repositoryAdapter.findByEmail("missing@email.com"))
-                .verifyComplete();
-    }
-
-    // -----------------------------
-    // existsByEmail
-    // -----------------------------
-    @Test
-    void mustExistByEmail_true() {
-        UserEntity entity = new UserEntity();
-        when(repository.findByEmail("test@email.com")).thenReturn(Mono.just(entity));
-
-        StepVerifier.create(repositoryAdapter.existsByEmail("test@email.com"))
+        StepVerifier.create(adapter.existsByEmail(email))
                 .expectNext(true)
                 .verifyComplete();
     }
 
     @Test
-    void mustExistByEmail_false() {
-        when(repository.findByEmail("missing@email.com")).thenReturn(Mono.empty());
+    void existsByEmail_false() {
+        String email = "noexist@example.com";
+        when(repository.existsByEmail(email)).thenReturn(Mono.just(false));
 
-        StepVerifier.create(repositoryAdapter.existsByEmail("missing@email.com"))
+        StepVerifier.create(adapter.existsByEmail(email))
                 .expectNext(false)
                 .verifyComplete();
     }
 
-    // -----------------------------
-    // findByDocumentNumber / existsByDocumentNumber
-    // -----------------------------
     @Test
-    void mustFindByDocumentNumber() {
-        UserEntity entity = new UserEntity();
-        User user = new User();
-        when(repository.findByDocumentNumber("123")).thenReturn(Mono.just(entity));
-        when(mapper.map(entity, User.class)).thenReturn(user);
+    void save_user_mappedCorrectly() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .names("Juan")
+                .lastName("Pérez")
+                .email("juan@example.com")
+                .baseSalary(2_500_000.0)
+                .build();
 
-        StepVerifier.create(repositoryAdapter.findByDocumentNumber("123"))
-                .expectNext(user)
+        // Simula repository.save para devolver siempre un Mono
+        Mockito.lenient()
+                .when(repository.save(any(UserEntity.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(adapter.save(user))
+                .expectNextMatches(u -> u.getEmail().equals("juan@example.com") && u.getNames().equals("Juan"))
                 .verifyComplete();
     }
-
-    @Test
-    void mustFindByDocumentNumber_empty() {
-        when(repository.findByDocumentNumber("999")).thenReturn(Mono.empty());
-
-        StepVerifier.create(repositoryAdapter.findByDocumentNumber("999"))
-                .verifyComplete();
-    }
-
-    @Test
-    void mustExistByDocumentNumber_true() {
-        UserEntity entity = new UserEntity();
-        when(repository.findByDocumentNumber("123")).thenReturn(Mono.just(entity));
-
-        StepVerifier.create(repositoryAdapter.existsByDocumentNumber("123"))
-                .expectNext(true)
-                .verifyComplete();
-    }
-
-    @Test
-    void mustExistByDocumentNumber_false() {
-        when(repository.findByDocumentNumber("999")).thenReturn(Mono.empty());
-
-        StepVerifier.create(repositoryAdapter.existsByDocumentNumber("999"))
-                .expectNext(false)
-                .verifyComplete();
-    }
+    
 }

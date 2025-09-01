@@ -31,7 +31,11 @@ class PostgreSQLConnectionPoolTest {
     }
 
     @Test
-    void getConnectionConfigSuccess() {
-        assertNotNull(connectionPool.getConnectionConfig(properties));
+    void r2dbcEntityTemplateSuccess() {
+        var pool = connectionPool.getConnectionConfig(properties);
+        assertNotNull(pool);
+
+        var template = connectionPool.r2dbcEntityTemplate(pool);
+        assertNotNull(template);
     }
 }
